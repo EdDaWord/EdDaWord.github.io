@@ -15,6 +15,6 @@ export default {
   ],
 } as ComponentMeta<typeof BottomSheet>;
 
-export const Basic = {
+export const Default = {
   args: {},
 };
