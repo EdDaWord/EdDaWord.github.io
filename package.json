@@ -6,7 +6,7 @@
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "start": "start-storybook -p 6006",
-    "build-storybook": "build-storybook -o docs-build"
+    "build-storybook": "build-storybook"
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "^3.5.2",
