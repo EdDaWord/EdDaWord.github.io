@@ -80,8 +80,12 @@ export const Default = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "gray",
+  },
   title: {
-    fontSize: 36,
+    fontSize: 24,
+    fontWeight: "bold",
     paddingBottom: 8,
   },
   subTitle: {

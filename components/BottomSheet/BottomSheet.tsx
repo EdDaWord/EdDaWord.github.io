@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Animated,
   Button,
   Dimensions,
   PanResponder,
@@ -37,7 +38,6 @@ export class BottomSheet extends React.Component<Props, State> {
   }
 
   _handlePanResponderMove = (e, gestureState) => {
-    console.log(e.nativeEvent.locationX, e.nativeEvent.locationY);
     this.setState((state) => ({
       ...state,
       translateY: gestureState.dy,
@@ -48,16 +48,16 @@ export class BottomSheet extends React.Component<Props, State> {
     const transform = { transform: [{ translateY: this.state.translateY }] };
     const { title, subtitle, content } = this.props;
     return (
-      <View {...this.panResponder.panHandlers}>
-        <View style={[transform]}>
+      <Animated.View style={styles.root} {...this.panResponder.panHandlers}>
+        <View style={[styles.container, transform]}>
           <View style={styles.dragbar} />
           <View>
             <Text>{title}</Text>
             <Text>{subtitle}</Text>
           </View>
-          {/*{content()}*/}
+          {content()}
         </View>
-      </View>
+      </Animated.View>
     );
   }
 
@@ -85,10 +85,13 @@ const styles = StyleSheet.create({
   root: {
     height: windowHeight,
     width: "100%",
-    opacity: 1,
     position: "absolute",
     backgroundColor: "white",
     top: windowHeight * 0.66,
+    borderRadius: 24,
+  },
+  container: {
+    backgroundColor: "white",
     borderRadius: 24,
   },
   dragbar: {
