@@ -20,8 +20,10 @@ export class BottomSheet extends React.Component<Props, State> {
     const { titleContent, descriptionContent, content } = this.props;
     return (
       <View>
-        <View>titleContent() descriptionContent()</View>
-        Narrow content()
+        <View>
+          <View>{titleContent()}</View> <View>{descriptionContent()}</View>
+        </View>
+        Narrow {content()}
       </View>
     );
   }
@@ -30,8 +32,10 @@ export class BottomSheet extends React.Component<Props, State> {
     const { titleContent, descriptionContent, content } = this.props;
     return (
       <View>
-        <View>titleContent() descriptionContent()</View>
-        Wide content()
+        <View>
+          <View>{titleContent()}</View> <View>{descriptionContent()}</View>
+        </View>
+        Wide {content()}
       </View>
     );
   }

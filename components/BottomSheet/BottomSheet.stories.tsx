@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, Dimensions, StyleSheet, Text, View } from "react-native";
 import { ComponentMeta } from "@storybook/react";
 import { NativeBaseProvider } from "native-base";
 
@@ -22,6 +22,8 @@ export const Default = () => {
   const handleDismiss = () => {
     setIsSheetShown(false);
   };
+
+  const { width: windowWidth } = Dimensions.get("window");
 
   return (
     <NativeBaseProvider>
@@ -47,7 +49,7 @@ export const Default = () => {
           onPress={handleDismiss}
           title="Dismiss Bottomsheet"
         />
-        {isSheetShown ? <BottomSheet /> : null}
+        {isSheetShown ? <BottomSheet isWideScreen={windowWidth > 600} /> : null}
       </View>
     </NativeBaseProvider>
   );
