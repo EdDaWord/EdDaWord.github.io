@@ -22,6 +22,7 @@ export const Default = () => {
     setIsSheetShown(!isSheetShown);
   };
 
+  // TODO: implement Debug Info
   const handleToggleDebugInfo = () => {
     setIsDebugInfoShown(!isDebugInfoShown);
   };

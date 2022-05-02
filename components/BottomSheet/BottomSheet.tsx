@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 
 type Props = {
@@ -8,14 +8,15 @@ type Props = {
   title: string;
 };
 
-export class BottomSheet extends React.Component<Props, State> {
-  static defaultProps = {
-    content: () => {},
-    isWideScreen: true,
-  };
+export const BottomSheet = ({
+  content = () => {},
+  subtitle,
+  isWideScreen = true,
+  title,
+}: Props) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  _renderNarrow() {
-    const { title, subtitle, content } = this.props;
+  const renderNarrow = () => {
     return (
       <View>
         Narrow
@@ -26,10 +27,9 @@ export class BottomSheet extends React.Component<Props, State> {
         {content()}
       </View>
     );
-  }
+  };
 
-  _renderWide() {
-    const { title, subtitle, content } = this.props;
+  const renderWide = () => {
     return (
       <View>
         Wide
@@ -40,16 +40,10 @@ export class BottomSheet extends React.Component<Props, State> {
         {content()}
       </View>
     );
-  }
+  };
 
-  render() {
-    const { isWideScreen } = this.props;
-
-    return (
-      <View>{isWideScreen ? this._renderWide() : this._renderNarrow()}</View>
-    );
-  }
-}
+  return <View>{isWideScreen ? renderWide() : renderNarrow()}</View>;
+};
 
 const styles = StyleSheet.create((theme) => ({
   root: {
