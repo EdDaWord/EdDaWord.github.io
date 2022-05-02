@@ -22,6 +22,7 @@
     "react-native-svg": "^12.1.1",
     "react-native-ui-lib": "^6.2.1",
     "react-native-vector-icons": "^9.0.0",
+    "react-native-web-linear-gradient": "^1.1.2",
     "styled-components": "^5.3.3",
     "styled-system": "^5.1.5"
   },

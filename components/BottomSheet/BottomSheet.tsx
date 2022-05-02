@@ -1,41 +1,43 @@
 import React from "react";
-import { Button, StyleSheet, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 
 type Props = {
-  titleContent: () => React.Node;
-  descriptionContent: () => React.Node;
   content: () => React.Node;
+  subtitle: string;
   isWideScreen: boolean;
+  title: string;
 };
 
 export class BottomSheet extends React.Component<Props, State> {
   static defaultProps = {
-    isWideScreen: true,
-    titleContent: () => {},
-    descriptionContent: () => {},
     content: () => {},
+    isWideScreen: true,
   };
 
   _renderNarrow() {
-    const { titleContent, descriptionContent, content } = this.props;
+    const { title, subtitle, content } = this.props;
     return (
       <View>
+        Narrow
         <View>
-          <View>{titleContent()}</View> <View>{descriptionContent()}</View>
+          <Text>{title}</Text>
+          <Text>{subtitle}</Text>
         </View>
-        Narrow {content()}
+        {content()}
       </View>
     );
   }
 
   _renderWide() {
-    const { titleContent, descriptionContent, content } = this.props;
+    const { title, subtitle, content } = this.props;
     return (
       <View>
+        Wide
         <View>
-          <View>{titleContent()}</View> <View>{descriptionContent()}</View>
+          <Text>{title}</Text>
+          <Text>{subtitle}</Text>
         </View>
-        Wide {content()}
+        {content()}
       </View>
     );
   }
