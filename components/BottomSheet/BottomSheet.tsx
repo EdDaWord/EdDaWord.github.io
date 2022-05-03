@@ -3,14 +3,15 @@ import {
   Animated,
   Button,
   Dimensions,
+  Modal,
   PanResponder,
+  ScrollView,
   StyleSheet,
   Text,
+  TouchableHighlight,
   View,
-  ScrollView,
 } from "react-native";
 
-const ON_SWIPE_AWAY_DELAY = 300;
 const PERCENTAGE_HID_WHEN_FULLY_OPENED = 0.125;
 
 export const GripperPosition = {
@@ -25,6 +26,7 @@ type Props = {
   subtitle: string;
   isWideScreen: boolean;
   title: string;
+  handleDismiss: () => {};
 };
 
 export class BottomSheet extends React.Component<Props, State> {
@@ -77,6 +79,7 @@ export class BottomSheet extends React.Component<Props, State> {
       const highVelThreshold = 2;
 
       if (vy > highVelThreshold) {
+        this.props.handleDismiss();
         this.setState({ gripperPosition: GripperPosition.closed });
       } else if (vy < -highVelThreshold) {
         this.setState({ gripperPosition: GripperPosition.fullOpen });
@@ -95,6 +98,7 @@ export class BottomSheet extends React.Component<Props, State> {
           }
         } else if (yValue < this._windowHeightOutsideRender * 0.75) {
           if (vy > midVelThreshold) {
+            this.props.handleDismiss();
             this.setState({ gripperPosition: GripperPosition.closed });
           } else {
             this.setState({ gripperPosition: GripperPosition.halfOpen });
@@ -103,6 +107,7 @@ export class BottomSheet extends React.Component<Props, State> {
           if (vy < -midVelThreshold) {
             this.setState({ gripperPosition: GripperPosition.halfOpen });
           } else {
+            this.props.handleDismiss();
             this.setState({ gripperPosition: GripperPosition.closed });
           }
         }
@@ -119,7 +124,7 @@ export class BottomSheet extends React.Component<Props, State> {
     } else if (this.state.gripperPosition === GripperPosition.halfOpen) {
       this._animateTo(this._windowHeightOutsideRender / 2);
     } else if (this.state.gripperPosition === GripperPosition.closed) {
-      setTimeout(this.props.onSwipedAway, ON_SWIPE_AWAY_DELAY);
+      this.props.handleDismiss();
       this._animateTo(this._windowHeightOutsideRender);
     }
   }
@@ -130,6 +135,30 @@ export class BottomSheet extends React.Component<Props, State> {
     }).start();
   }
 
+  _closeButton = () => {
+    const onPress = () =>
+      this.setState({ gripperPosition: GripperPosition.closed });
+
+    return (
+      <TouchableHighlight style={styles.closeButton} onPress={onPress}>
+        <View style={{ width: 24, height: 24 }}>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071Z"
+              fill="#191919"
+            />
+          </svg>
+        </View>
+      </TouchableHighlight>
+    );
+  };
+
   _renderNarrow() {
     this._setTranslateY();
 
@@ -137,9 +166,10 @@ export class BottomSheet extends React.Component<Props, State> {
 
     const DragBar = (
       <View style={styles.dragBarContainer}>
+        {this._closeButton()}
         <View style={styles.gripper} />
-        <Text>{title}</Text>
-        {subtitle ? <Text>{subtitle}</Text> : null}
+        <Text style={styles.title}>{title}</Text>
+        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
     );
 
@@ -160,7 +190,7 @@ export class BottomSheet extends React.Component<Props, State> {
         {...this._panResponder.panHandlers}
       >
         {DragBar}
-        {<ScrollView style={styles.contentContainer}>{content()}</ScrollView>}
+        {<ScrollView>{content()}</ScrollView>}
       </Animated.View>
     );
 
@@ -170,13 +200,13 @@ export class BottomSheet extends React.Component<Props, State> {
   _renderWide() {
     const { title, subtitle, content } = this.props;
     return (
-      <View>
+      <Modal transparent visible>
         <View>
           <Text>{title}</Text>
           <Text>{subtitle}</Text>
         </View>
         {content()}
-      </View>
+      </Modal>
     );
   }
 }
@@ -184,14 +214,21 @@ export class BottomSheet extends React.Component<Props, State> {
 const styles = StyleSheet.create({
   root: {
     position: "absolute",
+    height: 800,
   },
   dragBarContainer: {
     backgroundColor: "white",
-    topRightBorderRadius: 24,
-    topLeftBorderRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopLeftRadius: 24,
   },
-  contentContainer: {
-    maxHeight: 600,
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    alignSelf: "center",
+  },
+  subtitle: {
+    alignSelf: "center",
+    paddingBottom: 4,
   },
   gripper: {
     width: 80,
@@ -201,12 +238,9 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     borderRadius: 9999,
   },
+  closeButton: {
+    position: "absolute",
+    right: 10,
+    top: 8,
+  },
 });
-
-// TODO: use an SVG / Make this a TouchableHighlight
-// TODO: separate to it's own component
-const CloseButton = () => {
-  const onPress = () => console.log("CLOSE ME");
-
-  return <Button onPress={onPress} title="X" />;
-};

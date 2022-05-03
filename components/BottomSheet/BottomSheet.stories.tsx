@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Dimensions, StyleSheet, Text, View } from "react-native";
 import LinearGradient from "react-native-web-linear-gradient";
 import { ComponentMeta } from "@storybook/react";
@@ -13,13 +13,19 @@ export default {
   component: BottomSheet,
 };
 
+const { width: windowWidth, height: windowHeight } = Dimensions.get("window");
+
 export const Default = () => {
   const [isSheetShown, setIsSheetShown] = useState(false);
   const [isDebugInfoShown, setIsDebugInfoShown] = useState(false);
-  const { width: windowWidth } = Dimensions.get("window");
+
+  useEffect(() => {
+    updateThemeHack("white");
+  }, []);
 
   const handleToggleBottomSheet = () => {
     setIsSheetShown(!isSheetShown);
+    updateThemeHack(isSheetShown ? "white" : "gray");
   };
 
   // TODO: implement Debug Info
@@ -35,7 +41,7 @@ export const Default = () => {
           onPress={handleToggleBottomSheet}
           title="Toggle BottomSheet"
         />
-        <View style={styles.divider} />
+        <View style={styles.gap} />
         <Button
           color={PrimaryColor}
           onPress={handleToggleDebugInfo}
@@ -60,19 +66,46 @@ export const Default = () => {
     );
   };
 
+  const handleDismiss = () => {
+    setIsSheetShown(false);
+    updateThemeHack("white");
+  };
+
+  const updateThemeHack = (color) => {
+    const node = document.getElementById("background-color-hack");
+    if (node && node.parentNode) {
+      node.parentNode.removeChild(node);
+    }
+    const element = document.createElement("style");
+    element.setAttribute("id", "background-color-hack");
+    element.innerHTML = `
+      body {
+        background-color: ${color};
+      }
+    `;
+    const head = document.head;
+    head.insertBefore(element, head.firstChild);
+  };
+
   return (
-    <NativeBaseProvider>
+    <NativeBaseProvider style={styles.container}>
       <Text style={styles.title}>Building a `BottomSheet` Component</Text>
       <Text style={styles.subTitle}>
         Click below to show the BottomSheet and play with it's behavior!
       </Text>
       {bottomSheetToggles()}
+      <View style={styles.gap} />
+      <Text style={styles.subTitle}>
+        The API can be seen if you click on the "Docs" tab
+      </Text>
+      <View style={styles.largeGap} />
       {isSheetShown ? (
         <BottomSheet
           content={content}
           isWideScreen={windowWidth > 600}
           subtitle="Some more information here"
           title="My Custom Title"
+          handleDismiss={handleDismiss}
         />
       ) : null}
     </NativeBaseProvider>
@@ -81,7 +114,7 @@ export const Default = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "gray",
+    height: "100%",
   },
   title: {
     fontSize: 24,
@@ -95,8 +128,11 @@ const styles = StyleSheet.create({
   togglesContainer: {
     maxWidth: 300,
   },
-  divider: {
+  gap: {
     height: "1rem",
+  },
+  largeGap: {
+    height: windowHeight / 1.5,
   },
   gradientContent: {
     height: 900,
