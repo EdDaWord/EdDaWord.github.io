@@ -7,7 +7,18 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
 } from "react-native";
+
+const ON_SWIPE_AWAY_DELAY = 300;
+const PERCENTAGE_HID_WHEN_FULLY_OPENED = 0.125;
+
+export const GripperPosition = {
+  halfOpen: "half-open",
+  fullOpen: "full-open",
+  closed: "closed",
+  drag: "drag",
+};
 
 type Props = {
   content: () => React.Node;
@@ -16,49 +27,144 @@ type Props = {
   title: string;
 };
 
-const { height: windowHeight } = Dimensions.get("window");
-
 export class BottomSheet extends React.Component<Props, State> {
-  _panResponder = {};
+  pan = new Animated.ValueXY({ x: 0, y: 1000 });
+  _windowHeightOutsideRender = 0;
+  _sheetYInterpolation = {
+    inputRange: [0, 0, 1],
+    outputRange: [0, 0, 1],
+  };
 
   static defaultProps = {
     content: () => {},
     isWideScreen: true,
   };
 
-  constructor(props) {
+  constructor(props, state) {
     super(props);
-    this.state = { translateY: 0 };
-    this.panResponder = PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => true,
-      onPanResponderMove: this._handlePanResponderMove,
-      onPanResponderTerminationRequest: () => true,
-    });
+    this.state = {
+      gripperPosition: GripperPosition.halfOpen,
+    };
+    this._windowHeightOutsideRender = Dimensions.get("window").height;
   }
 
-  _handlePanResponderMove = (e, gestureState) => {
-    this.setState((state) => ({
-      ...state,
-      translateY: gestureState.dy,
-    }));
-  };
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.gripperPosition !== prevState.gripperPosition) {
+      this._setTranslateY();
+    }
+  }
+
+  render() {
+    const { isWideScreen } = this.props;
+
+    return isWideScreen ? this._renderWide() : this._renderNarrow();
+  }
+
+  _panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: () => {
+      this.pan.setOffset({
+        y: this.pan.y._value,
+      });
+      this.setState({ gripperPosition: GripperPosition.drag });
+    },
+    onPanResponderMove: Animated.event([null, { dy: this.pan.y }]),
+    onPanResponderRelease: (e, { moveY, vy }) => {
+      const yValue = this.pan.y
+        .interpolate(this._sheetYInterpolation)
+        .__getValue();
+      const midVelThreshold = 0.5;
+      const highVelThreshold = 2;
+
+      if (vy > highVelThreshold) {
+        this.setState({ gripperPosition: GripperPosition.closed });
+      } else if (vy < -highVelThreshold) {
+        this.setState({ gripperPosition: GripperPosition.fullOpen });
+      } else {
+        if (yValue < this._windowHeightOutsideRender * 0.25) {
+          if (vy > midVelThreshold) {
+            this.setState({ gripperPosition: GripperPosition.halfOpen });
+          } else {
+            this.setState({ gripperPosition: GripperPosition.fullOpen });
+          }
+        } else if (yValue < this._windowHeightOutsideRender * 0.5) {
+          if (vy < -midVelThreshold) {
+            this.setState({ gripperPosition: GripperPosition.fullOpen });
+          } else {
+            this.setState({ gripperPosition: GripperPosition.halfOpen });
+          }
+        } else if (yValue < this._windowHeightOutsideRender * 0.75) {
+          if (vy > midVelThreshold) {
+            this.setState({ gripperPosition: GripperPosition.closed });
+          } else {
+            this.setState({ gripperPosition: GripperPosition.halfOpen });
+          }
+        } else {
+          if (vy < -midVelThreshold) {
+            this.setState({ gripperPosition: GripperPosition.halfOpen });
+          } else {
+            this.setState({ gripperPosition: GripperPosition.closed });
+          }
+        }
+      }
+      this.pan.flattenOffset();
+    },
+  });
+
+  _setTranslateY() {
+    if (this.state.gripperPosition === GripperPosition.fullOpen) {
+      this._animateTo(
+        this._windowHeightOutsideRender * PERCENTAGE_HID_WHEN_FULLY_OPENED
+      );
+    } else if (this.state.gripperPosition === GripperPosition.halfOpen) {
+      this._animateTo(this._windowHeightOutsideRender / 2);
+    } else if (this.state.gripperPosition === GripperPosition.closed) {
+      setTimeout(this.props.onSwipedAway, ON_SWIPE_AWAY_DELAY);
+      this._animateTo(this._windowHeightOutsideRender);
+    }
+  }
+
+  _animateTo(yValue: number) {
+    Animated.spring(this.pan, {
+      toValue: { x: 0, y: yValue },
+    }).start();
+  }
 
   _renderNarrow() {
-    const transform = { transform: [{ translateY: this.state.translateY }] };
+    this._setTranslateY();
+
     const { title, subtitle, content } = this.props;
-    return (
-      <Animated.View style={styles.root} {...this.panResponder.panHandlers}>
-        <View style={[styles.container, transform]}>
-          <View style={styles.dragbar} />
-          <View>
-            <Text>{title}</Text>
-            <Text>{subtitle}</Text>
-          </View>
-          {content()}
-        </View>
+
+    const DragBar = (
+      <View style={styles.dragBarContainer}>
+        <View style={styles.gripper} />
+        <Text>{title}</Text>
+        {subtitle ? <Text>{subtitle}</Text> : null}
+      </View>
+    );
+
+    const dragableContent = (
+      <Animated.View
+        style={[
+          styles.root,
+          {
+            width: "100%",
+            height: "100%",
+            transform: [
+              {
+                translateY: this.pan.y.interpolate(this._sheetYInterpolation),
+              },
+            ],
+          },
+        ]}
+        {...this._panResponder.panHandlers}
+      >
+        {DragBar}
+        {<ScrollView style={styles.contentContainer}>{content()}</ScrollView>}
       </Animated.View>
     );
+
+    return dragableContent;
   }
 
   _renderWide() {
@@ -73,28 +179,21 @@ export class BottomSheet extends React.Component<Props, State> {
       </View>
     );
   }
-
-  render() {
-    const { isWideScreen } = this.props;
-
-    return isWideScreen ? this._renderWide() : this._renderNarrow();
-  }
 }
 
 const styles = StyleSheet.create({
   root: {
-    height: windowHeight,
-    width: "100%",
     position: "absolute",
-    backgroundColor: "white",
-    top: windowHeight * 0.66,
-    borderRadius: 24,
   },
-  container: {
+  dragBarContainer: {
     backgroundColor: "white",
-    borderRadius: 24,
+    topRightBorderRadius: 24,
+    topLeftBorderRadius: 24,
   },
-  dragbar: {
+  contentContainer: {
+    maxHeight: 600,
+  },
+  gripper: {
     width: 80,
     height: 4,
     backgroundColor: "gray",
