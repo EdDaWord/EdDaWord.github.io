@@ -1,11 +1,8 @@
-# Visit https://eddaword.github.io/storybook-static
+# Visit https://eddaword.github.io/
 
-See `./components/BottomSheet/` for code
 
-## Acknowledgements
+## AR iOS
 
-### Using React Native Web Storybook as the starting point
+.USDZ Demo for iOS 12.0 and above 
 
-https://github.com/dannyhw/addon_react_native_web_example
-
-Removed: `.iOS` & `.Android`
+.Reality Demo for iOS 13.0 and above (Interactable)
