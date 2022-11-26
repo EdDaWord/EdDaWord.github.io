@@ -1,0 +1,27 @@
+[
+  {
+    "libraryIdentifier" : "e0bacf26b10ee168a9ac1397e7811792",
+    "format" : "model",
+    "displayName" : "backtothefuture.usdz"
+  },
+  {
+    "libraryIdentifier" : "68cf541b6f9ad6fa38c372611c805094",
+    "format" : "model",
+    "displayName" : "board.usdz"
+  },
+  {
+    "libraryIdentifier" : "4df5dbd2236396dca9be35bf4d1f0ea3",
+    "format" : "model",
+    "displayName" : "leftshoe.usdz"
+  },
+  {
+    "libraryIdentifier" : "ccbe87f5eaa05e90f8e8cb7c17624def",
+    "format" : "model",
+    "displayName" : "rightshoe.usdz"
+  },
+  {
+    "libraryIdentifier" : "483a88e4ed1b09f985b486a8f66ce38c",
+    "format" : "model",
+    "displayName" : "board.usdz"
+  }
+]
