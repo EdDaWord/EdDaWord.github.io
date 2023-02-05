@@ -4,8 +4,10 @@
         <title>IVS demo</title>
         <script src="https://player.live-video.net/1.16.0/amazon-ivs-player.min.js"></script>
     </head>
-
-    <video id="video-player" controls playsinline></video>
+    <body style="margin:0;">
+        <video style="width:100%; top: 480px; position: absolute; z-index: 1;" id="video-player" controls playsinline></video>
+        <img style="width: 100%; z-index: -1" src="./assets/images/hbo.png">
+    </body>
     <script>
       if (IVSPlayer.isPlayerSupported) {
         // This shows how to include the Amazon IVS Player with a script tag from our CDN
